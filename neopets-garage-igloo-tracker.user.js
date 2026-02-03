@@ -571,16 +571,28 @@
                     if (data.success) {
                         let itemId = "unknown";
                         let itemName = null;
-
+                        
                         if (data.output) {
                             const temp = document.createElement("div");
                             temp.innerHTML = data.output;
-
+                        
                             const img = temp.querySelector("img[src*='/items/']");
                             if (img) {
-                                const src = img.getAttribute("src");
-                                itemId = src.split("/").pop().replace(/\.\w+$/, "");
+                                const src = img.getAttribute("src") || "";
                                 itemName = img.getAttribute("alt")?.trim() || null;
+                        
+                                const file = src.split("/").pop().replace(/\.\w+$/, "");
+                        
+                                // Trading card backs all look like "(color)tradingcardback"
+                                if (file.endsWith("tradingcardback") && itemName) {
+                                    // Create a stable ID from the card name
+                                    itemId = "tc_" + itemName
+                                        .toLowerCase()
+                                        .replace(/[^a-z0-9]+/g, "_")
+                                        .replace(/^_|_$/g, "");
+                                } else {
+                                    itemId = file;
+                                }
                             }
                         }
 
